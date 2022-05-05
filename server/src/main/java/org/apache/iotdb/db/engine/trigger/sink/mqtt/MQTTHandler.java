@@ -19,6 +19,7 @@
 
 package org.apache.iotdb.db.engine.trigger.sink.mqtt;
 
+import java.util.List;
 import org.apache.iotdb.db.engine.trigger.sink.api.Handler;
 import org.apache.iotdb.db.engine.trigger.sink.exception.SinkException;
 import org.apache.iotdb.tsfile.utils.Binary;
@@ -92,5 +93,11 @@ public class MQTTHandler implements Handler<MQTTConfiguration, MQTTEvent> {
     String payload =
         String.format(payloadFormatter, event.getTimestamp(), arrayToJson(event.getValues()));
     connection.publish(event.getTopic(), payload.getBytes(), event.getQoS(), event.retain());
+  }
+  @Override
+  public void onEvent(List<MQTTEvent> events) throws Exception {
+//    String payload =
+//        String.format(payloadFormatter, event.getTimestamp(), arrayToJson(event.getValues()));
+//    connection.publish(event.getTopic(), payload.getBytes(), event.getQoS(), event.retain());
   }
 }

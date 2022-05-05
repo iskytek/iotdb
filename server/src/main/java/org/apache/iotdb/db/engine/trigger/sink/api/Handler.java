@@ -19,14 +19,23 @@
 
 package org.apache.iotdb.db.engine.trigger.sink.api;
 
+import java.util.List;
+
 public interface Handler<C extends Configuration, E extends Event> {
 
   @SuppressWarnings("squid:S112")
-  default void open(C configuration) throws Exception {}
+  default void open(C configuration) throws Exception {
+  }
 
   @SuppressWarnings("squid:S112")
-  default void close() throws Exception {}
+  default void close() throws Exception {
+  }
 
   @SuppressWarnings("squid:S112")
   void onEvent(E event) throws Exception;
+
+  @SuppressWarnings("squid:S112")
+  default void onEvent(List<E> events) throws Exception {
+    throw new UnsupportedOperationException();
+  }
 }

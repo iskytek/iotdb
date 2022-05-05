@@ -17,10 +17,27 @@
  * under the License.
  */
 
-package org.apache.iotdb.db.engine.trigger.sink.api;
+package org.apache.iotdb.db.engine.trigger.sink.http;
 
-public interface Event {
-  default String fullPath(){
-    return null;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.iotdb.db.engine.trigger.sink.api.Configuration;
+
+public class HTTPConfiguration implements Configuration {
+
+  private final String endpoint;
+
+  public HTTPConfiguration(String endpoint) {
+    this.endpoint = endpoint;
+  }
+
+  public String getEndpoint() {
+    return endpoint;
   }
 }
