@@ -19,20 +19,13 @@
 
 package org.apache.iotdb.db.mpp.plan.statement;
 
-import org.apache.iotdb.db.mpp.plan.statement.crud.AggregationQueryStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.FillQueryStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.GroupByFillQueryStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.GroupByQueryStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertMultiTabletsStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertRowStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertRowsOfOneDeviceStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertRowsStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.InsertTabletStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.LastQueryStatement;
 import org.apache.iotdb.db.mpp.plan.statement.crud.QueryStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.UDAFQueryStatement;
-import org.apache.iotdb.db.mpp.plan.statement.crud.UDTFQueryStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.AlterTimeSeriesStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.CountDevicesStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.CountLevelTimeSeriesStatement;
@@ -42,9 +35,12 @@ import org.apache.iotdb.db.mpp.plan.statement.metadata.CreateAlignedTimeSeriesSt
 import org.apache.iotdb.db.mpp.plan.statement.metadata.CreateTimeSeriesStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.SchemaFetchStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.SetStorageGroupStatement;
+import org.apache.iotdb.db.mpp.plan.statement.metadata.SetTTLStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.ShowDevicesStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.ShowStorageGroupStatement;
+import org.apache.iotdb.db.mpp.plan.statement.metadata.ShowTTLStatement;
 import org.apache.iotdb.db.mpp.plan.statement.metadata.ShowTimeSeriesStatement;
+import org.apache.iotdb.db.mpp.plan.statement.metadata.UnSetTTLStatement;
 import org.apache.iotdb.db.mpp.plan.statement.sys.AuthorStatement;
 
 /**
@@ -90,39 +86,24 @@ public abstract class StatementVisitor<R, C> {
     return visitStatement(alterTimeSeriesStatement, context);
   }
 
+  // Alter TTL
+  public R visitSetTTL(SetTTLStatement setTTLStatement, C context) {
+    return visitStatement(setTTLStatement, context);
+  }
+
+  public R visitUnSetTTL(UnSetTTLStatement unSetTTLStatement, C context) {
+    return visitStatement(unSetTTLStatement, context);
+  }
+
+  public R visitShowTTL(ShowTTLStatement showTTLStatement, C context) {
+    return visitStatement(showTTLStatement, context);
+  }
+
   /** Data Manipulation Language (DML) */
 
   // Select Statement
   public R visitQuery(QueryStatement queryStatement, C context) {
     return visitStatement(queryStatement, context);
-  }
-
-  public R visitAggregationQuery(AggregationQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitFillQuery(FillQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitGroupByQuery(GroupByQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitGroupByFillQuery(GroupByFillQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitLastQuery(LastQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitUDTFQuery(UDTFQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
-  }
-
-  public R visitUDAFQuery(UDAFQueryStatement queryStatement, C context) {
-    return visitQuery(queryStatement, context);
   }
 
   // Insert Statement

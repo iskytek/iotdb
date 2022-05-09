@@ -18,8 +18,8 @@
  */
 package org.apache.iotdb.db.mpp.execution.operator.schema;
 
-import org.apache.iotdb.db.exception.metadata.MetadataException;
-import org.apache.iotdb.db.metadata.path.PartialPath;
+import org.apache.iotdb.commons.exception.MetadataException;
+import org.apache.iotdb.commons.path.PartialPath;
 import org.apache.iotdb.db.mpp.common.header.HeaderConstant;
 import org.apache.iotdb.db.mpp.execution.driver.SchemaDriverContext;
 import org.apache.iotdb.db.mpp.execution.operator.OperatorContext;
@@ -33,7 +33,7 @@ import org.apache.iotdb.tsfile.utils.Binary;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TimeSeriesSchemaScanOperator extends SchemaScanOperator {
+public class TimeSeriesSchemaScanOperator extends SchemaQueryScanOperator {
   private String key;
   private String value;
   private boolean isContains;

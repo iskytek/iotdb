@@ -19,8 +19,8 @@
 
 package org.apache.iotdb.db.mpp.plan.plan.node.write;
 
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
-import org.apache.iotdb.db.metadata.path.PartialPath;
+import org.apache.iotdb.commons.exception.IllegalPathException;
+import org.apache.iotdb.commons.path.PartialPath;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.PlanNodeId;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.PlanNodeType;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.write.InsertRowNode;
@@ -76,6 +76,6 @@ public class InsertRowsOfOneDeviceNodeSerdeTest {
 
     Assert.assertEquals(PlanNodeType.INSERT_ROWS_OF_ONE_DEVICE.ordinal(), byteBuffer.getShort());
 
-    Assert.assertEquals(InsertRowsOfOneDeviceNode.deserialize(byteBuffer), node);
+    Assert.assertEquals(node, InsertRowsOfOneDeviceNode.deserialize(byteBuffer));
   }
 }

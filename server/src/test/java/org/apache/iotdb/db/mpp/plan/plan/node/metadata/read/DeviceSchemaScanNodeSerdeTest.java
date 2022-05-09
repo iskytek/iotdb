@@ -19,14 +19,14 @@
 package org.apache.iotdb.db.mpp.plan.plan.node.metadata.read;
 
 import org.apache.iotdb.common.rpc.thrift.TEndPoint;
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
-import org.apache.iotdb.db.metadata.path.PartialPath;
+import org.apache.iotdb.commons.exception.IllegalPathException;
+import org.apache.iotdb.commons.path.PartialPath;
 import org.apache.iotdb.db.mpp.common.FragmentInstanceId;
 import org.apache.iotdb.db.mpp.common.PlanFragmentId;
 import org.apache.iotdb.db.mpp.plan.plan.node.PlanNodeDeserializeHelper;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.PlanNodeId;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.metedata.read.DevicesSchemaScanNode;
-import org.apache.iotdb.db.mpp.plan.planner.plan.node.metedata.read.SeriesSchemaMergeNode;
+import org.apache.iotdb.db.mpp.plan.planner.plan.node.metedata.read.SchemaQueryMergeNode;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.process.ExchangeNode;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.process.LimitNode;
 import org.apache.iotdb.db.mpp.plan.planner.plan.node.process.OffsetNode;
@@ -43,8 +43,7 @@ public class DeviceSchemaScanNodeSerdeTest {
   public void testSerializeAndDeserialize() throws IllegalPathException {
     OffsetNode offsetNode = new OffsetNode(new PlanNodeId("offset"), 10);
     LimitNode limitNode = new LimitNode(new PlanNodeId("limit"), 10);
-    SeriesSchemaMergeNode schemaMergeNode =
-        new SeriesSchemaMergeNode(new PlanNodeId("schemaMerge"));
+    SchemaQueryMergeNode schemaMergeNode = new SchemaQueryMergeNode(new PlanNodeId("schemaMerge"));
     ExchangeNode exchangeNode = new ExchangeNode(new PlanNodeId("exchange"));
     DevicesSchemaScanNode devicesSchemaScanNode =
         new DevicesSchemaScanNode(

@@ -19,10 +19,10 @@
 package org.apache.iotdb.db.mpp.execution.operator;
 
 import org.apache.iotdb.commons.concurrent.IoTDBThreadPoolFactory;
+import org.apache.iotdb.commons.exception.IllegalPathException;
+import org.apache.iotdb.commons.exception.MetadataException;
 import org.apache.iotdb.db.engine.querycontext.QueryDataSource;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
-import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.path.MeasurementPath;
 import org.apache.iotdb.db.mpp.common.FragmentInstanceId;
 import org.apache.iotdb.db.mpp.common.PlanFragmentId;
@@ -55,7 +55,7 @@ import static org.junit.Assert.fail;
 
 public class DeviceViewOperatorTest {
 
-  private static final String DEVICE_MERGE_OPERATOR_TEST_SG = "root.DeviceMergeOperatorTest";
+  private static final String DEVICE_MERGE_OPERATOR_TEST_SG = "root.DeviceViewOperatorTest";
   private final List<String> deviceIds = new ArrayList<>();
   private final List<MeasurementSchema> measurementSchemas = new ArrayList<>();
 
@@ -142,7 +142,7 @@ public class DeviceViewOperatorTest {
       dataTypes.add(TSDataType.INT32);
       dataTypes.add(TSDataType.INT32);
 
-      DeviceViewOperator deviceMergeOperator =
+      DeviceViewOperator deviceViewOperator =
           new DeviceViewOperator(
               fragmentInstanceContext.getOperatorContexts().get(2),
               devices,
@@ -150,8 +150,8 @@ public class DeviceViewOperatorTest {
               deviceColumnIndex,
               dataTypes);
       int count = 0;
-      while (deviceMergeOperator.hasNext()) {
-        TsBlock tsBlock = deviceMergeOperator.next();
+      while (deviceViewOperator.hasNext()) {
+        TsBlock tsBlock = deviceViewOperator.next();
         assertEquals(3, tsBlock.getValueColumnCount());
         assertEquals(20, tsBlock.getPositionCount());
         for (int i = 0; i < tsBlock.getPositionCount(); i++) {

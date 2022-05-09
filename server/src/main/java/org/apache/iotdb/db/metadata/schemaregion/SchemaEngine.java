@@ -21,11 +21,11 @@ package org.apache.iotdb.db.metadata.schemaregion;
 
 import org.apache.iotdb.commons.concurrent.IoTDBThreadPoolFactory;
 import org.apache.iotdb.commons.consensus.SchemaRegionId;
+import org.apache.iotdb.commons.exception.MetadataException;
+import org.apache.iotdb.commons.path.PartialPath;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.mnode.IStorageGroupMNode;
-import org.apache.iotdb.db.metadata.path.PartialPath;
 import org.apache.iotdb.db.metadata.storagegroup.IStorageGroupSchemaManager;
 import org.apache.iotdb.db.metadata.storagegroup.StorageGroupSchemaManager;
 
@@ -163,11 +163,17 @@ public class SchemaEngine {
       PartialPath storageGroup, SchemaRegionId schemaRegionId) throws MetadataException {
     ISchemaRegion schemaRegion = schemaRegionMap.get(schemaRegionId);
     if (schemaRegion != null) {
-      throw new MetadataException(
-          String.format(
-              "SchemaRegion [%s] is duplicated between [%s] and [%s], "
-                  + "and the former one has been recovered.",
-              schemaRegionId, schemaRegion.getStorageGroupFullPath(), storageGroup.getFullPath()));
+      if (schemaRegion.getStorageGroupFullPath().equals(storageGroup.getFullPath())) {
+        return;
+      } else {
+        throw new MetadataException(
+            String.format(
+                "SchemaRegion [%s] is duplicated between [%s] and [%s], "
+                    + "and the former one has been recovered.",
+                schemaRegionId,
+                schemaRegion.getStorageGroupFullPath(),
+                storageGroup.getFullPath()));
+      }
     }
     schemaRegionMap.put(
         schemaRegionId, createSchemaRegionWithoutExistenceCheck(storageGroup, schemaRegionId));

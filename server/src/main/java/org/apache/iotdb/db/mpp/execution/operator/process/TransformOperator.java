@@ -23,7 +23,7 @@ import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.mpp.execution.operator.Operator;
 import org.apache.iotdb.db.mpp.execution.operator.OperatorContext;
-import org.apache.iotdb.db.query.dataset.IUDFInputDataSet;
+import org.apache.iotdb.db.mpp.plan.analyze.TypeProvider;
 import org.apache.iotdb.db.query.expression.Expression;
 import org.apache.iotdb.db.query.udf.core.executor.UDTFContext;
 import org.apache.iotdb.db.query.udf.core.layer.EvaluationDAGBuilder;
@@ -43,11 +43,13 @@ import org.apache.iotdb.tsfile.read.common.block.column.TimeColumnBuilder;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TransformOperator implements ProcessOperator {
 
+  // TODO: make it configurable
   protected static final int FETCH_SIZE = 10000;
 
   protected final float udfReaderMemoryBudgetInMB =
@@ -61,10 +63,10 @@ public class TransformOperator implements ProcessOperator {
   protected final Operator inputOperator;
   protected final List<TSDataType> inputDataTypes;
   protected final Expression[] outputExpressions;
-  protected final UDTFContext udtfContext;
   protected final boolean keepNull;
 
-  protected IUDFInputDataSet inputDataset;
+  protected RawQueryInputLayer inputLayer;
+  protected UDTFContext udtfContext;
   protected LayerPointReader[] transformers;
   protected TimeSelector timeHeap;
   protected List<TSDataType> outputDataTypes;
@@ -74,23 +76,34 @@ public class TransformOperator implements ProcessOperator {
       Operator inputOperator,
       List<TSDataType> inputDataTypes,
       Expression[] outputExpressions,
-      UDTFContext udtfContext,
-      boolean keepNull)
+      boolean keepNull,
+      ZoneId zoneId,
+      TypeProvider typeProvider)
       throws QueryProcessException, IOException {
     this.operatorContext = operatorContext;
     this.inputOperator = inputOperator;
     this.inputDataTypes = inputDataTypes;
     this.outputExpressions = outputExpressions;
-    this.udtfContext = udtfContext;
     this.keepNull = keepNull;
 
-    initInputDataset(inputDataTypes);
+    initInputLayer(inputDataTypes);
+    initUdtfContext(zoneId);
     initTransformers();
-    initLayerPointReaders();
+    readyForFirstIteration();
+    updateTypeProvider(typeProvider);
   }
 
-  private void initInputDataset(List<TSDataType> inputDataTypes) {
-    inputDataset = new TsBlockInputDataSet(inputOperator, inputDataTypes);
+  private void initInputLayer(List<TSDataType> inputDataTypes) throws QueryProcessException {
+    inputLayer =
+        new RawQueryInputLayer(
+            operatorContext.getOperatorId(),
+            udfReaderMemoryBudgetInMB,
+            new TsBlockInputDataSet(inputOperator, inputDataTypes));
+  }
+
+  private void initUdtfContext(ZoneId zoneId) {
+    udtfContext = new UDTFContext(zoneId);
+    udtfContext.constructUdfExecutors(outputExpressions);
   }
 
   protected void initTransformers() throws QueryProcessException, IOException {
@@ -102,8 +115,7 @@ public class TransformOperator implements ProcessOperator {
       transformers =
           new EvaluationDAGBuilder(
                   operatorContext.getOperatorId(),
-                  new RawQueryInputLayer(
-                      operatorContext.getOperatorId(), udfReaderMemoryBudgetInMB, inputDataset),
+                  inputLayer,
                   outputExpressions,
                   udtfContext,
                   udfTransformerMemoryBudgetInMB + udfCollectorMemoryBudgetInMB)
@@ -115,7 +127,7 @@ public class TransformOperator implements ProcessOperator {
     }
   }
 
-  protected void initLayerPointReaders() throws QueryProcessException, IOException {
+  protected void readyForFirstIteration() throws QueryProcessException, IOException {
     timeHeap = new TimeSelector(transformers.length << 1, true);
     for (LayerPointReader reader : transformers) {
       iterateReaderToNextValid(reader);
@@ -134,6 +146,12 @@ public class TransformOperator implements ProcessOperator {
       }
       timeHeap.add(reader.currentTime());
       break;
+    }
+  }
+
+  private void updateTypeProvider(TypeProvider typeProvider) {
+    for (int i = 0; i < transformers.length; ++i) {
+      typeProvider.setType(outputExpressions[i].toString(), transformers[i].getDataType());
     }
   }
 
@@ -174,6 +192,8 @@ public class TransformOperator implements ProcessOperator {
         }
 
         ++rowCount;
+
+        inputLayer.updateRowRecordListEvictionUpperBound();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
